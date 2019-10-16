@@ -832,12 +832,12 @@ class Forcefield(app.ForceField):
         unique_references = collections.OrderedDict(sorted(unique_references.items()))
         with open(references_file, 'w') as f:
             for doi, atomtypes in unique_references.items():
-                url = "https://doi.org/" + doi
+                url = "http://api.crossref.org/works/{}/transform/application/x-bibtex".format(doi)
                 headers = {"accept": "application/x-bibtex"}
-                res = requests.get(url, headers=headers)
-                if res.status_code != 200:
-                    raise FoyerError('Error connecting to the doi webpage')
-                bibtex_ref = res.text
+                bibtex_response = requests.get(url, headers=headers)
+                if bibtex_response.status_code != 200:
+                    raise FoyerError("Error Getting references for the specified DOI".format(doi))
+                bibtex_ref = bibtex_response.text
                 note = (',\n\tnote = {Parameters for atom types: ' +
                         ', '.join(sorted(atomtypes)) + '}')
                 bibtex_ref = bibtex_ref[:-2] + note + bibtex_ref[-2:]
